@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'theme/app_theme.dart';
 import 'providers/profiles_provider.dart';
-import 'screens/home/home_screen.dart';
+import 'screens/navigation/main_navigation.dart';
 import 'screens/calibration/step1_group.dart';
 
 void main() async {
@@ -42,6 +42,6 @@ class AppRoot extends ConsumerWidget {
     final profilesState = ref.watch(profilesProvider);
     final hasProfiles = profilesState.profiles.isNotEmpty;
 
-    return hasProfiles ? const HomeScreen() : const Step1GroupScreen();
+    return hasProfiles ? const MainNavigationScreen() : const Step1GroupScreen();
   }
 }

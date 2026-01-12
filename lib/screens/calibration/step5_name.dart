@@ -6,7 +6,7 @@ import '../../providers/profiles_provider.dart';
 import '../../models/trip_profile.dart';
 import '../../widgets/progress_header.dart';
 import '../../widgets/continue_button.dart';
-import '../home/home_screen.dart';
+import '../navigation/main_navigation.dart';
 
 class Step5NameScreen extends ConsumerStatefulWidget {
   const Step5NameScreen({super.key});
@@ -66,7 +66,7 @@ class _Step5NameScreenState extends ConsumerState<Step5NameScreen> {
 
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
         (route) => false,
       );
     }
