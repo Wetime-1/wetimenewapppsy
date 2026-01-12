@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'features/onboarding/onboarding_flow.dart';
-import 'features/profile/profile_page.dart';
+import 'theme/app_theme.dart';
+import 'providers/profiles_provider.dart';
+import 'screens/home/home_screen.dart';
+import 'screens/calibration/step1_group.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,27 +12,23 @@ void main() async {
   // Initialize Hive for local storage
   await Hive.initFlutter();
   await Hive.openBox('user_data');
-  await Hive.openBox('trips');
 
   runApp(
     const ProviderScope(
-      child: TravelApp(),
+      child: WetimeApp(),
     ),
   );
 }
 
-class TravelApp extends StatelessWidget {
-  const TravelApp({super.key});
+class WetimeApp extends StatelessWidget {
+  const WetimeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Travel Profile',
+      title: 'Wetime',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
       home: const AppRoot(),
     );
   }
@@ -41,9 +39,9 @@ class AppRoot extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userBox = Hive.box('user_data');
-    final hasProfile = userBox.get('profile_completed', defaultValue: false);
+    final profilesState = ref.watch(profilesProvider);
+    final hasProfiles = profilesState.profiles.isNotEmpty;
 
-    return hasProfile ? const ProfilePage() : const OnboardingFlow();
+    return hasProfiles ? const HomeScreen() : const Step1GroupScreen();
   }
 }

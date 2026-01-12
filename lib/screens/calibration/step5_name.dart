@@ -1,0 +1,163 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../theme/app_theme.dart';
+import '../../providers/calibration_provider.dart';
+import '../../providers/profiles_provider.dart';
+import '../../models/trip_profile.dart';
+import '../../widgets/progress_header.dart';
+import '../../widgets/continue_button.dart';
+import '../home/home_screen.dart';
+
+class Step5NameScreen extends ConsumerStatefulWidget {
+  const Step5NameScreen({super.key});
+
+  @override
+  ConsumerState<Step5NameScreen> createState() => _Step5NameScreenState();
+}
+
+class _Step5NameScreenState extends ConsumerState<Step5NameScreen> {
+  final TextEditingController _nameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  List<String> _getSuggestions() {
+    final calibration = ref.read(calibrationProvider);
+    final groupLabel = {
+      'solo': 'Solo',
+      'couple': 'Romantic',
+      'family': 'Family',
+      'friends': 'Squad'
+    }[calibration.group] ?? '';
+    
+    return [
+      '$groupLabel ${calibration.location}',
+      '${calibration.budget?.toUpperCase()} Trip',
+      '${calibration.location} Adventure',
+    ];
+  }
+
+  void _createProfile() async {
+    final calibration = ref.read(calibrationProvider);
+    final name = _nameController.text.trim();
+    
+    if (name.isEmpty) return;
+
+    final profile = TripProfile(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      group: calibration.group!,
+      budget: calibration.budget!,
+      location: calibration.location!,
+      country: calibration.country!,
+      name: name,
+      icon: TripProfile.getIconForGroup(calibration.group!),
+      weatherFilter: calibration.weatherFilter,
+      timeAwareness: calibration.timeAwareness,
+      crowdAvoidance: calibration.crowdAvoidance,
+      liveAvailability: calibration.liveAvailability,
+      createdAt: DateTime.now(),
+    );
+
+    await ref.read(profilesProvider.notifier).addProfile(profile);
+    ref.read(calibrationProvider.notifier).reset();
+
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final suggestions = _getSuggestions();
+
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            ProgressHeader(
+              currentStep: 5,
+              totalSteps: 5,
+              onBack: () => Navigator.pop(context),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(AppTheme.spacingXl),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('IDENTITY', style: AppTheme.labelSmall),
+                    const SizedBox(height: AppTheme.spacingSm),
+                    Text('Name this trip', style: AppTheme.headingLarge),
+                    const SizedBox(height: AppTheme.spacingSm),
+                    Text('Save it for future use', style: AppTheme.bodyMedium),
+                    const SizedBox(height: AppTheme.spacingXxl),
+                    TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        hintText: 'e.g., Solo Weekend Explorer',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                          borderSide: const BorderSide(color: AppTheme.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                          borderSide: const BorderSide(color: AppTheme.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                          borderSide: const BorderSide(color: AppTheme.accent, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.all(AppTheme.spacingLg),
+                      ),
+                      style: AppTheme.bodyLarge,
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: AppTheme.spacingLg),
+                    Text('Suggestions:', style: AppTheme.bodyMedium),
+                    const SizedBox(height: AppTheme.spacingSm),
+                    Wrap(
+                      spacing: AppTheme.spacingSm,
+                      runSpacing: AppTheme.spacingSm,
+                      children: suggestions.map((suggestion) {
+                        return GestureDetector(
+                          onTap: () {
+                            _nameController.text = suggestion;
+                            setState(() {});
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppTheme.spacingMd,
+                              vertical: AppTheme.spacingSm,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.bgSecondary,
+                              borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                              border: Border.all(color: AppTheme.border),
+                            ),
+                            child: Text(suggestion, style: AppTheme.bodyMedium),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const Spacer(),
+                    ContinueButton(
+                      text: 'Create Trip Profile',
+                      isActive: _nameController.text.trim().isNotEmpty,
+                      onPressed: _createProfile,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

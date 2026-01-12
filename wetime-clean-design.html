@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wetime — Clean Design</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8F9FA;
+            --bg-tertiary: #F1F3F4;
+            --text-primary: #1A1A1A;
+            --text-secondary: #5F6368;
+            --text-tertiary: #9AA0A6;
+            --accent: #1A73E8;
+            --accent-light: #E8F0FE;
+            --success: #34A853;
+            --success-light: #E6F4EA;
+            --warning: #EA8600;
+            --warning-light: #FEF7E0;
+            --border: #E8EAED;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app {
+            max-width: 420px;
+            margin: 0 auto;
+            height: 100vh;
+            height: 100dvh;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-primary);
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            inset: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(20px);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+            overflow-y: auto;
+            background: var(--bg-primary);
+        }
+
+        .screen.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .screen.exit {
+            transform: translateX(-20px);
+            opacity: 0;
+        }
+
+        /* Home Header */
+        .home-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        /* Weather Banner */
+        .weather-banner {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .weather-icon { font-size: 2.2rem; }
+
+        .weather-info h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .weather-info p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .weather-tags {
+            margin-left: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tag {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 100px;
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .tag.warning {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        /* Section */
+        .section { margin-bottom: 24px; }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .section-action {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--accent);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Active Trip Card */
+        .active-card {
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            position: relative;
+        }
+
+        .active-badge {
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .trip-row {
+            display: flex;
+            gap: 16px;
+            margin: 8px 0 16px;
+        }
+
+        .trip-icon {
+            width: 52px;
+            height: 52px;
+            background: var(--accent-light);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+        }
+
+        .trip-info h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .trip-info p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .trip-stats {
+            display: flex;
+            gap: 8px;
+            padding: 16px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .stat {
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-lbl {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .trip-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover { background: #1557B0; }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover { background: var(--bg-tertiary); }
+
+        /* Profile Cards Scroll */
+        .profiles-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            margin: 0 -24px;
+            padding: 0 24px 8px;
+            scrollbar-width: none;
+        }
+
+        .profiles-scroll::-webkit-scrollbar { display: none; }
+
+        .profile-card {
+            min-width: 120px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .profile-card:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .profile-card.new {
+            border-style: dashed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 90px;
+            color: var(--text-tertiary);
+        }
+
+        .profile-card.new:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .profile-emoji {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+        }
+
+        .profile-meta {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+        }
+
+        /* Insights */
+        .insights {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+        }
+
+        .insights-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .insights-header h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .insights-badge {
+            font-size: 0.55rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border-radius: 100px;
+            text-transform: uppercase;
+        }
+
+        .insight-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .insight-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .insight-row strong {
+            color: var(--text-primary);
+        }
+
+        /* Calibration Header */
+        .cal-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .back-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--bg-secondary);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .progress-wrap { flex: 1; }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 100px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 100px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+        }
+
+        /* Question */
+        .question { margin-bottom: 28px; }
+
+        .q-step {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 6px;
+        }
+
+        .q-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+
+        .q-sub {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        /* Options Grid */
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option {
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option:hover {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .option.selected {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .option-emoji {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .option-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .option-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .option.selected .checkmark {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Budget Selector */
+        .budget-bar {
+            display: flex;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+
+        .budget-opt {
+            flex: 1;
+            padding: 14px 8px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .budget-opt:hover { background: var(--bg-tertiary); }
+
+        .budget-opt.selected {
+            background: var(--accent);
+            color: white;
+        }
+
+        .budget-opt .b-icon {
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+        }
+
+        .budget-opt .b-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Location Input */
+        .loc-wrap { margin-bottom: 24px; }
+
+        .input-box {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            color: var(--text-tertiary);
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 14px 14px 14px 44px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .text-input::placeholder { color: var(--text-tertiary); }
+
+        .suggestions {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: all 0.2s ease;
+        }
+
+        .suggestions.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .sug-item {
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .sug-item:hover { background: var(--bg-secondary); }
+
+        .sug-item .flag { font-size: 1.2rem; }
+        .sug-item .city { font-weight: 500; }
+        .sug-item .country { color: var(--text-tertiary); font-size: 0.8rem; }
+
+        .gps-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 12px;
+        }
+
+        .gps-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        /* Toggle List */
+        .toggles { margin-bottom: 24px; }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+        }
+
+        .toggle-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-icon { font-size: 1.2rem; }
+
+        .toggle-text h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .toggle-text p {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+        }
+
+        .switch {
+            width: 44px;
+            height: 26px;
+            background: var(--bg-tertiary);
+            border-radius: 100px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .switch.on { background: var(--accent); }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .switch.on::after { left: 21px; }
+
+        /* Name Input */
+        .name-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+
+        .name-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .name-input::placeholder { color: var(--text-tertiary); }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .chip {
+            padding: 8px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Continue Button */
+        .continue-wrap {
+            margin-top: auto;
+            padding-top: 16px;
+        }
+
+        .btn-continue {
+            width: 100%;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            cursor: not-allowed;
+            transition: all 0.2s ease;
+        }
+
+        .btn-continue.active {
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn-continue.active:hover { background: #1557B0; }
+
+        /* Processing Screen */
+        .processing {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .pulse-container {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            margin-bottom: 32px;
+        }
+
+        .pulse {
+            position: absolute;
+            inset: 0;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s ease-out infinite;
+        }
+
+        .pulse:nth-child(2) { animation-delay: 0.5s; }
+        .pulse:nth-child(3) { animation-delay: 1s; }
+
+        @keyframes pulse {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        .pulse-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .processing h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .processing p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .steps {
+            text-align: left;
+            max-width: 220px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            transition: all 0.3s ease;
+        }
+
+        .step.done { color: var(--text-primary); }
+
+        .step-dot {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .step.done .step-dot {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- HOME SCREEN -->
+        <div id="home" class="screen active">
+            <div class="home-header">
+                <div class="logo">Wetime</div>
+                <div class="avatar">👤</div>
+            </div>
+
+            <div class="weather-banner">
+                <span class="weather-icon" id="wIcon">🌧️</span>
+                <div class="weather-info">
+                    <h3><span id="wTemp">14°C</span> in <span id="wCity">Brussels</span></h3>
+                    <p id="wDesc">Light rain expected</p>
+                </div>
+                <div class="weather-tags">
+                    <span class="tag warning" id="wTag1">Indoor priority</span>
+                    <span class="tag" id="wTag2">Museums +40%</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-title">Active Trip</span>
+                    <button class="section-action">Quick switch</button>
+                </div>
+                <div class="active-card" id="activeCard">
+                    <span class="active-badge">Active</span>
+                    <div class="trip-row">
+                        <div class="trip-icon" id="aIcon">🎒</div>
+                        <div class="trip-info">
+                            <h3 id="aName">Solo Weekend</h3>
+                            <p id="aMeta">Brussels • Budget</p>
+                        </div>
+                    </div>
+                    <div class="trip-stats">
+                        <div class="stat">
+                            <div class="stat-val">234</div>
+                            <div class="stat-lbl">Matches</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-val">89</div>
+                            <div class="stat-lbl">Weather OK</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-val">12</div>
+                            <div class="stat-lbl">Nearby</div>
+                        </div>
+                    </div>
+                    <div class="trip-btns">
+                        <button class="btn btn-primary">Explore</button>
+                        <button class="btn btn-secondary">Edit</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-title">Saved Profiles</span>
+                    <button class="section-action" onclick="go('step1')">+ New</button>
+                </div>
+                <div class="profiles-scroll" id="profilesList">
+                    <div class="profile-card new" onclick="go('step1')">
+                        <span style="font-size:1.3rem">+</span>
+                        <span style="font-size:0.75rem;margin-top:4px">New Trip</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="insights">
+                    <div class="insights-header">
+                        <span>🧠</span>
+                        <h4>Your Patterns</h4>
+                        <span class="insights-badge">Learning</span>
+                    </div>
+                    <div class="insight-row">
+                        <span>🍜</span>
+                        <span>You <strong>always splurge on food</strong> even on budget trips</span>
+                    </div>
+                    <div class="insight-row">
+                        <span>🌳</span>
+                        <span>Family trips favor <strong>outdoor activities 3x more</strong></span>
+                    </div>
+                    <div class="insight-row">
+                        <span>🌙</span>
+                        <span>Solo trips skew <strong>nightlife heavy</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 1: GROUP -->
+        <div id="step1" class="screen">
+            <div class="cal-header">
+                <button class="back-btn" onclick="go('home')">←</button>
+                <div class="progress-wrap">
+                    <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+                    <div class="progress-text">Step 1 of 5</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-step">Identity</div>
+                <div class="q-title">Who's on this trip?</div>
+                <div class="q-sub">This shapes pace, places & pricing</div>
+            </div>
+
+            <div class="options">
+                <div class="option" data-val="solo" onclick="pick(this,'group')">
+                    <span class="checkmark">✓</span>
+                    <div class="option-emoji">🎒</div>
+                    <div class="option-label">Solo</div>
+                    <div class="option-desc">Freedom mode</div>
+                </div>
+                <div class="option" data-val="couple" onclick="pick(this,'group')">
+                    <span class="checkmark">✓</span>
+                    <div class="option-emoji">💑</div>
+                    <div class="option-label">Couple</div>
+                    <div class="option-desc">Romance ready</div>
+                </div>
+                <div class="option" data-val="family" onclick="pick(this,'group')">
+                    <span class="checkmark">✓</span>
+                    <div class="option-emoji">👨‍👩‍👧‍👦</div>
+                    <div class="option-label">Family</div>
+                    <div class="option-desc">Kid-friendly</div>
+                </div>
+                <div class="option" data-val="friends" onclick="pick(this,'group')">
+                    <span class="checkmark">✓</span>
+                    <div class="option-emoji">🎉</div>
+                    <div class="option-label">Friends</div>
+                    <div class="option-desc">Squad goals</div>
+                </div>
+            </div>
+
+            <div class="continue-wrap">
+                <button id="btn1" class="btn-continue" onclick="go('step2')">Continue</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: BUDGET -->
+        <div id="step2" class="screen">
+            <div class="cal-header">
+                <button class="back-btn" onclick="go('step1')">←</button>
+                <div class="progress-wrap">
+                    <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+                    <div class="progress-text">Step 2 of 5</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-step">Resources</div>
+                <div class="q-title">Your comfort zone?</div>
+                <div class="q-sub">We find gems at every level</div>
+            </div>
+
+            <div class="budget-bar">
+                <div class="budget-opt" data-val="budget" onclick="pickBudget(this)">
+                    <div class="b-icon">🎒</div>
+                    <div class="b-label">Budget</div>
+                </div>
+                <div class="budget-opt" data-val="mid" onclick="pickBudget(this)">
+                    <div class="b-icon">⭐</div>
+                    <div class="b-label">Comfort</div>
+                </div>
+                <div class="budget-opt" data-val="premium" onclick="pickBudget(this)">
+                    <div class="b-icon">✨</div>
+                    <div class="b-label">Premium</div>
+                </div>
+                <div class="budget-opt" data-val="luxury" onclick="pickBudget(this)">
+                    <div class="b-icon">👑</div>
+                    <div class="b-label">Luxury</div>
+                </div>
+            </div>
+
+            <div class="continue-wrap">
+                <button id="btn2" class="btn-continue" onclick="go('step3')">Continue</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: LOCATION -->
+        <div id="step3" class="screen">
+            <div class="cal-header">
+                <button class="back-btn" onclick="go('step2')">←</button>
+                <div class="progress-wrap">
+                    <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+                    <div class="progress-text">Step 3 of 5</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-step">Destination</div>
+                <div class="q-title">Where to?</div>
+                <div class="q-sub">We'll tune into local gems & weather</div>
+            </div>
+
+            <div class="loc-wrap">
+                <div class="input-box">
+                    <span class="input-icon">📍</span>
+                    <input type="text" class="text-input" id="locInput" placeholder="Search city..." oninput="onLocInput()" onfocus="showSug()">
+                    <div class="suggestions" id="sugs">
+                        <div class="sug-item" onclick="pickLoc('Brussels','🇧🇪','Belgium')">
+                            <span class="flag">🇧🇪</span>
+                            <span class="city">Brussels</span>
+                            <span class="country">Belgium</span>
+                        </div>
+                        <div class="sug-item" onclick="pickLoc('Barcelona','🇪🇸','Spain')">
+                            <span class="flag">🇪🇸</span>
+                            <span class="city">Barcelona</span>
+                            <span class="country">Spain</span>
+                        </div>
+                        <div class="sug-item" onclick="pickLoc('Paris','🇫🇷','France')">
+                            <span class="flag">🇫🇷</span>
+                            <span class="city">Paris</span>
+                            <span class="country">France</span>
+                        </div>
+                        <div class="sug-item" onclick="pickLoc('Amsterdam','🇳🇱','Netherlands')">
+                            <span class="flag">🇳🇱</span>
+                            <span class="city">Amsterdam</span>
+                            <span class="country">Netherlands</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="gps-btn" onclick="useGps()">📍 Use current location</button>
+            </div>
+
+            <div class="continue-wrap">
+                <button id="btn3" class="btn-continue" onclick="go('step4')">Continue</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: CONTEXT -->
+        <div id="step4" class="screen">
+            <div class="cal-header">
+                <button class="back-btn" onclick="go('step3')">←</button>
+                <div class="progress-wrap">
+                    <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+                    <div class="progress-text">Step 4 of 5</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-step">Smart Filters</div>
+                <div class="q-title">Context awareness</div>
+                <div class="q-sub">Let the app adapt to reality</div>
+            </div>
+
+            <div class="toggles">
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <span class="toggle-icon">🌦️</span>
+                        <div class="toggle-text">
+                            <h4>Weather Filtering</h4>
+                            <p>Hide outdoor spots when raining</p>
+                        </div>
+                    </div>
+                    <div class="switch on" data-key="weather" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <span class="toggle-icon">🕐</span>
+                        <div class="toggle-text">
+                            <h4>Time Awareness</h4>
+                            <p>Bars at night, cafés by day</p>
+                        </div>
+                    </div>
+                    <div class="switch on" data-key="time" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <span class="toggle-icon">👥</span>
+                        <div class="toggle-text">
+                            <h4>Crowd Avoidance</h4>
+                            <p>Skip busy hotspots</p>
+                        </div>
+                    </div>
+                    <div class="switch" data-key="crowds" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <span class="toggle-icon">🎫</span>
+                        <div class="toggle-text">
+                            <h4>Live Availability</h4>
+                            <p>Only show open/bookable</p>
+                        </div>
+                    </div>
+                    <div class="switch on" data-key="availability" onclick="toggleSwitch(this)"></div>
+                </div>
+            </div>
+
+            <div class="continue-wrap">
+                <button id="btn4" class="btn-continue active" onclick="go('step5')">Continue</button>
+            </div>
+        </div>
+
+        <!-- STEP 5: NAME -->
+        <div id="step5" class="screen">
+            <div class="cal-header">
+                <button class="back-btn" onclick="go('step4')">←</button>
+                <div class="progress-wrap">
+                    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+                    <div class="progress-text">Step 5 of 5</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-step">Identity</div>
+                <div class="q-title">Name this trip</div>
+                <div class="q-sub">Save it for future use</div>
+            </div>
+
+            <input type="text" class="name-input" id="nameInput" placeholder="e.g., Solo Weekend Explorer" oninput="onNameInput()">
+
+            <div class="chips" id="chipsList"></div>
+
+            <div class="continue-wrap">
+                <button id="btn5" class="btn-continue" onclick="createProfile()">Create Trip Profile</button>
+            </div>
+        </div>
+
+        <!-- PROCESSING -->
+        <div id="processing" class="screen processing">
+            <div class="pulse-container">
+                <div class="pulse"></div>
+                <div class="pulse"></div>
+                <div class="pulse"></div>
+                <div class="pulse-core">⚡</div>
+            </div>
+            <h2>Building your trip profile</h2>
+            <p>Connecting to real-time data</p>
+            <div class="steps">
+                <div class="step" id="s1"><span class="step-dot">✓</span>Profile parameters set</div>
+                <div class="step" id="s2"><span class="step-dot">✓</span>Fetching weather data</div>
+                <div class="step" id="s3"><span class="step-dot">✓</span>Matching recommendations</div>
+                <div class="step" id="s4"><span class="step-dot">✓</span>Applying context filters</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const data = {
+            group: null,
+            budget: null,
+            location: null,
+            country: null,
+            context: { weather: true, time: true, crowds: false, availability: true },
+            name: null
+        };
+
+        const profiles = JSON.parse(localStorage.getItem('wt_profiles') || '[]');
+        let active = JSON.parse(localStorage.getItem('wt_active') || 'null');
+
+        // Init
+        renderProfiles();
+        if (active) updateHome();
+
+        // Navigation
+        function go(id) {
+            document.querySelectorAll('.screen').forEach(s => {
+                if (s.id === id) {
+                    s.classList.remove('exit');
+                    s.classList.add('active');
+                } else {
+                    if (s.classList.contains('active')) s.classList.add('exit');
+                    s.classList.remove('active');
+                }
+            });
+            if (id === 'step5') genChips();
+        }
+
+        // Group selection
+        function pick(el, field) {
+            el.parentElement.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            data[field] = el.dataset.val;
+            document.getElementById('btn1').classList.add('active');
+        }
+
+        // Budget selection
+        function pickBudget(el) {
+            document.querySelectorAll('.budget-opt').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            data.budget = el.dataset.val;
+            document.getElementById('btn2').classList.add('active');
+        }
+
+        // Location
+        function onLocInput() {
+            const v = document.getElementById('locInput').value;
+            document.getElementById('sugs').classList.toggle('show', v.length > 0);
+        }
+
+        function showSug() {
+            if (document.getElementById('locInput').value.length > 0) {
+                document.getElementById('sugs').classList.add('show');
+            }
+        }
+
+        function pickLoc(city, flag, country) {
+            document.getElementById('locInput').value = city;
+            document.getElementById('sugs').classList.remove('show');
+            data.location = city;
+            data.country = country;
+            document.getElementById('btn3').classList.add('active');
+        }
+
+        function useGps() {
+            document.getElementById('locInput').value = 'Brussels (Current)';
+            data.location = 'Brussels';
+            data.country = 'Belgium';
+            document.getElementById('btn3').classList.add('active');
+        }
+
+        // Toggle
+        function toggleSwitch(el) {
+            el.classList.toggle('on');
+            data.context[el.dataset.key] = el.classList.contains('on');
+        }
+
+        // Name
+        function onNameInput() {
+            data.name = document.getElementById('nameInput').value;
+            document.getElementById('btn5').classList.toggle('active', data.name.length > 0);
+        }
+
+        function genChips() {
+            const g = { solo: 'Solo', couple: 'Romantic', family: 'Family', friends: 'Squad' };
+            const loc = data.location || 'Trip';
+            const chips = [
+                `${g[data.group] || ''} ${loc}`,
+                `${loc} Adventure`,
+                `${g[data.group] || ''} Escape`
+            ];
+            document.getElementById('chipsList').innerHTML = chips.map(c =>
+                `<span class="chip" onclick="useChip('${c}')">${c}</span>`
+            ).join('');
+        }
+
+        function useChip(name) {
+            document.getElementById('nameInput').value = name;
+            data.name = name;
+            document.getElementById('btn5').classList.add('active');
+        }
+
+        // Create
+        function createProfile() {
+            go('processing');
+            ['s1','s2','s3','s4'].forEach((id, i) => {
+                setTimeout(() => document.getElementById(id).classList.add('done'), i * 600 + 400);
+            });
+
+            setTimeout(() => {
+                const icons = { solo: '🎒', couple: '💑', family: '👨‍👩‍👧‍👦', friends: '🎉' };
+                const profile = {
+                    id: Date.now(),
+                    ...data,
+                    icon: icons[data.group] || '✦',
+                    createdAt: new Date().toISOString()
+                };
+                profiles.unshift(profile);
+                active = profile;
+                localStorage.setItem('wt_profiles', JSON.stringify(profiles));
+                localStorage.setItem('wt_active', JSON.stringify(active));
+
+                // Reset
+                Object.assign(data, { group: null, budget: null, location: null, country: null, name: null });
+                document.querySelectorAll('.option, .budget-opt').forEach(o => o.classList.remove('selected'));
+                document.querySelectorAll('.btn-continue').forEach(b => b.classList.remove('active'));
+                document.getElementById('btn4').classList.add('active');
+                document.getElementById('locInput').value = '';
+                document.getElementById('nameInput').value = '';
+                ['s1','s2','s3','s4'].forEach(id => document.getElementById(id).classList.remove('done'));
+
+                renderProfiles();
+                updateHome();
+                go('home');
+            }, 3000);
+        }
+
+        function renderProfiles() {
+            const list = document.getElementById('profilesList');
+            const newCard = `<div class="profile-card new" onclick="go('step1')"><span style="font-size:1.3rem">+</span><span style="font-size:0.75rem;margin-top:4px">New Trip</span></div>`;
+            const cards = profiles.map(p => `
+                <div class="profile-card" onclick="setActive(${p.id})">
+                    <div class="profile-emoji">${p.icon}</div>
+                    <div class="profile-name">${p.name}</div>
+                    <div class="profile-meta">${p.location}</div>
+                </div>
+            `).join('');
+            list.innerHTML = newCard + cards;
+        }
+
+        function setActive(id) {
+            active = profiles.find(p => p.id === id);
+            localStorage.setItem('wt_active', JSON.stringify(active));
+            updateHome();
+        }
+
+        function updateHome() {
+            if (!active) return;
+            document.getElementById('aIcon').textContent = active.icon;
+            document.getElementById('aName').textContent = active.name;
+            document.getElementById('aMeta').textContent = `${active.location} • ${active.budget}`;
+            document.getElementById('wCity').textContent = active.location;
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.input-box')) {
+                document.getElementById('sugs').classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
