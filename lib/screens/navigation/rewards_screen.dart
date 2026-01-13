@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
+import '../../providers/vibes_provider.dart';
 
-class RewardsScreen extends StatelessWidget {
+class RewardsScreen extends ConsumerWidget {
   const RewardsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vibesState = ref.watch(vibesProvider);
+    
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -15,22 +19,22 @@ class RewardsScreen extends StatelessWidget {
             children: [
               Text('Rewards', style: AppTheme.headingLarge),
               const SizedBox(height: AppTheme.spacingSm),
-              Text('The Economy', style: AppTheme.bodyMedium),
+              Text('Your Wallet', style: AppTheme.bodyMedium),
               const SizedBox(height: AppTheme.spacingXxl),
               Expanded(
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('👛', style: TextStyle(fontSize: 64)),
+                      const Text('✨', style: TextStyle(fontSize: 64)),
                       const SizedBox(height: AppTheme.spacingLg),
                       Text(
-                        'Vibe Counter',
+                        'Vibes Balance',
                         style: AppTheme.headingMedium,
                       ),
                       const SizedBox(height: AppTheme.spacingSm),
                       Text(
-                        'Vibe Store & Camino Token Exchange',
+                        'Earn vibes, exchange for rewards',
                         style: AppTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),
@@ -43,11 +47,17 @@ class RewardsScreen extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            Text('0', style: AppTheme.headingLarge.copyWith(color: AppTheme.accent)),
+                            Text('${vibesState.balance}', style: AppTheme.headingLarge.copyWith(color: AppTheme.accent)),
                             const SizedBox(height: AppTheme.spacingSm),
-                            Text('Camino Tokens', style: AppTheme.bodyMedium),
+                            Text('Vibes', style: AppTheme.bodyMedium),
                           ],
                         ),
+                      ),
+                      const SizedBox(height: AppTheme.spacingLg),
+                      Text(
+                        'Exchange vibes for gifts, tools, or Camino Tokens',
+                        style: AppTheme.bodyMedium.copyWith(color: AppTheme.textTertiary),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),

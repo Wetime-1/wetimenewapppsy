@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/calibration_provider.dart';
+import '../../providers/vibes_provider.dart';
 import '../../widgets/progress_header.dart';
 import '../../widgets/continue_button.dart';
+import '../../widgets/vibes_earned_toast.dart';
 import 'step4_context.dart';
 
 class Step3LocationScreen extends ConsumerWidget {
@@ -37,11 +39,11 @@ class Step3LocationScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('DESTINATION', style: AppTheme.labelSmall),
+                    Text('YOUR ADVENTURE', style: AppTheme.labelSmall),
                     const SizedBox(height: AppTheme.spacingSm),
-                    Text('Where to?', style: AppTheme.headingLarge),
+                    Text('Where are we heading?', style: AppTheme.headingLarge),
                     const SizedBox(height: AppTheme.spacingSm),
-                    Text("We'll tune into local gems", style: AppTheme.bodyMedium),
+                    Text('Curated local experiences await', style: AppTheme.bodyMedium),
                     const SizedBox(height: AppTheme.spacingXxl),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -76,10 +78,15 @@ class Step3LocationScreen extends ConsumerWidget {
                           final isSelected = calibration.location == city['city'];
                           return GestureDetector(
                             onTap: () {
+                              final wasNull = ref.read(calibrationProvider).location == null;
                               ref.read(calibrationProvider.notifier).setLocation(
                                 city['city']!,
                                 city['country']!,
                               );
+                              if (wasNull) {
+                                ref.read(vibesProvider.notifier).earnVibes(15, 'Chose your destination');
+                                showVibesEarned(context, 15);
+                              }
                             },
                             child: Container(
                               margin: const EdgeInsets.only(bottom: AppTheme.spacingSm),

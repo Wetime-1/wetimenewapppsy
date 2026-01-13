@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/calibration_provider.dart';
+import '../../providers/vibes_provider.dart';
 import '../../widgets/progress_header.dart';
 import '../../widgets/context_toggle.dart';
 import '../../widgets/continue_button.dart';
+import '../../widgets/vibes_earned_toast.dart';
 import 'step5_name.dart';
 
 class Step4ContextScreen extends ConsumerWidget {
@@ -29,11 +31,11 @@ class Step4ContextScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('SMART FILTERS', style: AppTheme.labelSmall),
+                    Text('PREFERENCES', style: AppTheme.labelSmall),
                     const SizedBox(height: AppTheme.spacingSm),
-                    Text('Context awareness', style: AppTheme.headingLarge),
+                    Text('How can we help?', style: AppTheme.headingLarge),
                     const SizedBox(height: AppTheme.spacingSm),
-                    Text('Let the app adapt to reality', style: AppTheme.bodyMedium),
+                    Text('Suggestions adapt to real-time conditions', style: AppTheme.bodyMedium),
                     const SizedBox(height: AppTheme.spacingXxl),
                     Expanded(
                       child: SingleChildScrollView(
@@ -78,10 +80,16 @@ class Step4ContextScreen extends ConsumerWidget {
                     ContinueButton(
                       isActive: true,
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const Step5NameScreen()),
-                        );
+                        ref.read(vibesProvider.notifier).earnVibes(10, 'Set preferences');
+                        showVibesEarned(context, 10);
+                        Future.delayed(const Duration(milliseconds: 600), () {
+                          if (context.mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const Step5NameScreen()),
+                            );
+                          }
+                        });
                       },
                     ),
                   ],

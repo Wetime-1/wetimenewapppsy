@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../theme/app_theme.dart';
+import '../providers/vibes_provider.dart';
 
-class ProgressHeader extends StatelessWidget {
+class ProgressHeader extends ConsumerWidget {
   final int currentStep;
   final int totalSteps;
   final VoidCallback onBack;
@@ -14,7 +16,9 @@ class ProgressHeader extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vibesState = ref.watch(vibesProvider);
+    
     return Padding(
       padding: const EdgeInsets.all(AppTheme.spacingLg),
       child: Row(
@@ -36,9 +40,29 @@ class ProgressHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppTheme.spacingMd),
-          Text(
-            'Step $currentStep/$totalSteps',
-            style: AppTheme.bodyMedium,
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.spacingMd,
+              vertical: AppTheme.spacingSm,
+            ),
+            decoration: BoxDecoration(
+              color: AppTheme.accentLight,
+              borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('✨', style: TextStyle(fontSize: 14)),
+                const SizedBox(width: 4),
+                Text(
+                  '${vibesState.balance}',
+                  style: AppTheme.bodyMedium.copyWith(
+                    color: AppTheme.accent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

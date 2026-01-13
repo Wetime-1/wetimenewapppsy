@@ -4,7 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'theme/app_theme.dart';
 import 'providers/profiles_provider.dart';
 import 'screens/navigation/main_navigation.dart';
-import 'screens/calibration/step1_group.dart';
+import 'screens/calibration/welcome_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +42,6 @@ class AppRoot extends ConsumerWidget {
     final profilesState = ref.watch(profilesProvider);
     final hasProfiles = profilesState.profiles.isNotEmpty;
 
-    return hasProfiles ? const MainNavigationScreen() : const Step1GroupScreen();
+    return hasProfiles ? const MainNavigationScreen() : const WelcomeScreen();
   }
 }
